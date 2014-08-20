@@ -5,48 +5,30 @@
   Move your mouse in X to change de focus distance
   
 **/
-
-import remixlab.bias.event.*;
-import remixlab.bias.event.shortcut.*;
-import remixlab.bias.agent.profile.*;
-import remixlab.bias.agent.*;
-import remixlab.dandelion.agent.*;
-import remixlab.proscene.*;
-import remixlab.dandelion.core.*;
-import remixlab.dandelion.constraint.*;
-import remixlab.fpstiming.*;
-import remixlab.util.*;
-import remixlab.dandelion.geom.*;
-import remixlab.bias.core.*;
   
   DofManager dof;
-
-  Scene scene;
-  Scene sceneDepth;
   
   boolean renderDepth = false;
 
+  PShape shp;
+
   public void setup() {
-    size(800, 400, P2D);
+    size(800, 400, P3D);
     dof = new DofManager();
-    
     dof.setup(this, width, height);
 
-    scene = new Scene(this, dof.getSrc());
-    scene.setRadius(1000);
-    sceneDepth = new Scene(this, dof.getDepth());
-    sceneDepth.setRadius(1000);
-    sceneDepth.setCamera(scene.camera());
-    sceneDepth.disableMouseAgent();
-    sceneDepth.disableKeyboardAgent();
-
+    shp = createShape(SPHERE, 100);
+    shp.setFill(color(255));
+    shp.setStroke(false);
    }
 
   public void draw() {
     background(0);
 
-    drawGeometry(dof.getSrc(), scene, true);
-    drawGeometry(dof.getDepth(), sceneDepth, false);
+    drawGeometry(dof.getSrc(), true);
+    drawGeometry(dof.getDepth(), false);
+
+    frame.setTitle("" + frameRate);
 
     dof.draw();
 
@@ -63,26 +45,22 @@ import remixlab.bias.core.*;
     //image(dof.getSrc(), width / 2, 0);
   }
 
-  private void drawGeometry(PGraphics pg, Scene scene, boolean lights) {
+  private void drawGeometry(PGraphics pg, boolean lights) {
     pg.beginDraw();
-    scene.beginDraw();
-    //
     pg.background(0);
-    pg.fill(150);
-    pg.noStroke();
-    if (lights)
-      pg.lights();
-    pg.pushMatrix();
-    for (int i = 0; i < 20; i++) {
-      pg.translate(10, 10, 100);
-      pg.sphere(50);
+    if (lights) {
+      pg.directionalLight(255, 100, 50, 1, 0, 0);
+      pg.directionalLight(50, 100, 255, -1, 0, 0);
     }
-    pg.popMatrix();
-    scene.endDraw();
+    for (int i = 0; i < 20; i++) {
+      pg.pushMatrix();
+      pg.translate((i*7763)%width, (i*777)%height, 30*i*sin(i+millis()*0.0001)-500);
+      pg.shape(shp);
+      pg.popMatrix();
+    }
     pg.endDraw();
   }
   
   void keyPressed(){
    renderDepth = !renderDepth; 
   }
-
